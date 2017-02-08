@@ -2,7 +2,7 @@ version: '2'
 services:
   squid:
     build: .
-    image: 'b4tman/squid'
+    image: 'b4tman/squid:armhf'
     container_name: 'my-squid'
     restart: always
     ports:
