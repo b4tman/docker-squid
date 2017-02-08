@@ -1,2 +1,4 @@
 # docker-squid
-ocker Squid container based on Alpine
+
+Docker Squid container based on Alpine Linux
+
