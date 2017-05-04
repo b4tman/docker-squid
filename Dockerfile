@@ -2,8 +2,9 @@ FROM alpine:3.5
 MAINTAINER b4tman <b4tm4n@mail.ru>
 
 ENV SQUID_VER 3.5.25
+ENV SQUID_SIG_KEY EA31CC5E9488E5168D2DCC5EB268E706FF5CF463
+ENV SQUID_CONFIG_FILE /etc/squid/squid.conf
 ENV TZ Europe/Moscow
-ENV SQUID_CONFIG_FILE=/etc/squid/squid.conf
 
 RUN set -x && \
 	deluser squid 2>/dev/null; delgroup squid 2>/dev/null; \
@@ -17,7 +18,8 @@ RUN apk add --no-cache \
 		libressl2.4-libssl \
 		libltdl
 
-RUN apk add --no-cache --virtual .build-deps  \
+RUN set -x && \
+	apk add --no-cache --virtual .build-deps  \
 		gcc \
 		g++ \
 		libc-dev \
@@ -38,11 +40,11 @@ RUN apk add --no-cache --virtual .build-deps  \
 	\
 	mkdir -p /tmp/build && \
 	cd /tmp/build && \
-    curl -SsL http://www.squid-cache.org/Versions/v3/${SQUID_VER%.*}/squid-${SQUID_VER}.tar.gz -o squid-${SQUID_VER}.tar.gz && \
-	curl -SsL http://www.squid-cache.org/Versions/v3/${SQUID_VER%.*}/squid-${SQUID_VER}.tar.gz.asc -o squid-${SQUID_VER}.tar.gz.asc	&& \
+    curl -SsL http://www.squid-cache.org/Versions/v${SQUID_VER%.*.*}/${SQUID_VER%.*}/squid-${SQUID_VER}.tar.gz -o squid-${SQUID_VER}.tar.gz && \
+	curl -SsL http://www.squid-cache.org/Versions/v${SQUID_VER%.*.*}/${SQUID_VER%.*}/squid-${SQUID_VER}.tar.gz.asc -o squid-${SQUID_VER}.tar.gz.asc	&& \
 	\
 	export GNUPGHOME="$(mktemp -d)" && \
-	gpg --keyserver ha.pool.sks-keyservers.net --recv-keys EA31CC5E9488E5168D2DCC5EB268E706FF5CF463	&& \
+	gpg --keyserver ha.pool.sks-keyservers.net --recv-keys ${SQUID_SIG_KEY}	&& \
 	gpg --batch --verify squid-${SQUID_VER}.tar.gz.asc squid-${SQUID_VER}.tar.gz && \
 	\
 	tar --strip 1 -xzf squid-${SQUID_VER}.tar.gz && \
@@ -83,7 +85,7 @@ RUN apk add --no-cache --virtual .build-deps  \
 		--enable-arp-acl \
 		--enable-htcp \
 		--enable-carp \
-		--enable-poll \
+		--enable-epoll \
 		--enable-follow-x-forwarded-for \
 		--enable-storeio="diskd rock" \
 		--enable-ipv6 \
