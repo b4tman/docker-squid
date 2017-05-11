@@ -110,6 +110,9 @@ RUN set -x && \
 	cd / && \
 	rm -rf /tmp/build "$GNUPGHOME"
 
+COPY squid-log.conf /etc/squid/squid-log.conf
+RUN echo 'include /etc/squid/squid-log.conf' >> "$SQUID_CONFIG_FILE"
+	
 VOLUME ["/var/cache/squid"]	
 EXPOSE 3128/tcp
 
