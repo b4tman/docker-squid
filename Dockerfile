@@ -38,7 +38,7 @@ RUN set -x && \
 		heimdal-dev \
 		libtool \
 		libcap-dev \
-		linux-headers && \
+		linux-headers ; \
 	\
 	mkdir -p /tmp/build && \
 	cd /tmp/build && \
@@ -108,7 +108,7 @@ RUN set -x && \
 	\
 	/sbin/setup-timezone -z $TZ && \
 	\
-	apk del .build-deps && \
+	apk del .build-deps ; \
 	cd / && \
 	rm -rf /tmp/build "$GNUPGHOME"
 
