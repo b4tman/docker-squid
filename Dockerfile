@@ -1,8 +1,8 @@
 FROM alpine:3.5
 MAINTAINER b4tman <b4tm4n@mail.ru>
 
-ENV SQUID_VER 3.5.25
-ENV SQUID_SIG_KEY EA31CC5E9488E5168D2DCC5EB268E706FF5CF463
+ENV SQUID_VER 4.0.19
+ENV SQUID_SIG_KEY B06884EDB779C89B044E64E3CD6DBF8EF3B17D3E
 ENV SQUID_CONFIG_FILE /etc/squid/squid.conf
 ENV TZ Europe/Moscow
 
@@ -12,10 +12,9 @@ RUN set -x && \
 
 RUN apk add --no-cache \
 		libstdc++ \
-		heimdal-libs \
 		libcap \
-		libressl2.4-libcrypto \
-		libressl2.4-libssl \
+		libcrypto1.0 \
+		libssl1.0 \
 		libltdl
 
 RUN set -x && \
@@ -27,21 +26,20 @@ RUN set -x && \
 		tzdata \
 		curl \
 		gnupg \
-		libressl-dev \
+		openssl-dev \
 		perl-dev \
 		autoconf \
 		automake \
 		make \
 		pkgconfig \
-		heimdal-dev \
 		libtool \
 		libcap-dev \
 		linux-headers && \
 	\
 	mkdir -p /tmp/build && \
 	cd /tmp/build && \
-    curl -SsL http://www.squid-cache.org/Versions/v${SQUID_VER%.*.*}/${SQUID_VER%.*}/squid-${SQUID_VER}.tar.gz -o squid-${SQUID_VER}.tar.gz && \
-	curl -SsL http://www.squid-cache.org/Versions/v${SQUID_VER%.*.*}/${SQUID_VER%.*}/squid-${SQUID_VER}.tar.gz.asc -o squid-${SQUID_VER}.tar.gz.asc	&& \
+    curl -SsL http://www.squid-cache.org/Versions/v${SQUID_VER%.*.*}/squid-${SQUID_VER}.tar.gz -o squid-${SQUID_VER}.tar.gz && \
+	curl -SsL http://www.squid-cache.org/Versions/v${SQUID_VER%.*.*}/squid-${SQUID_VER}.tar.gz.asc -o squid-${SQUID_VER}.tar.gz.asc	&& \
 	\
 	export GNUPGHOME="$(mktemp -d)" && \
 	gpg --keyserver ha.pool.sks-keyservers.net --recv-keys ${SQUID_SIG_KEY}	&& \
@@ -71,11 +69,12 @@ RUN set -x && \
 		--enable-auth-negotiate="wrapper" \
 		--enable-silent-rules \
 		--disable-mit \
-		--enable-heimdal \
+		--disable-heimdal \
 		--enable-delay-pools \
 		--enable-arp-acl \
 		--enable-openssl \
 		--enable-ssl-crtd \
+		--enable-security-cert-generators="file" \
 		--enable-ident-lookups \
 		--enable-useragent-log \
 		--enable-cache-digests \
@@ -119,4 +118,4 @@ EXPOSE 3128/tcp
 
 USER squid
 
-CMD ["sh", "-c", "/usr/sbin/squid -f ${SQUID_CONFIG_FILE} -z && exec /usr/sbin/squid -f ${SQUID_CONFIG_FILE} -NYCd 1"]
+CMD ["sh", "-c", "/usr/sbin/squid -f ${SQUID_CONFIG_FILE} --foreground -z && exec /usr/sbin/squid -f ${SQUID_CONFIG_FILE} --foreground -YCd 1"]
