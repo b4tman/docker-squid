@@ -94,7 +94,10 @@ RUN set -x && \
 		--with-large-files \
 		--with-default-user=squid \
 		--with-openssl \
-		--with-pidfile=/var/run/squid/squid.pid \
+		--with-pidfile=/var/run/squid/squid.pid && \
+	\
+	sed -ie 's/LOCK_UN/8/g' src/base/File.h && \
+	\
 	make && \
 	make install && \
 	install -d -o squid -g squid \
