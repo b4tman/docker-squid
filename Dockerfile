@@ -96,7 +96,7 @@ RUN set -x && \
 		--with-openssl \
 		--with-pidfile=/var/run/squid/squid.pid && \
 	\
-	sed -ie 's/LOCK_UN/8/g' src/base/File.h && \
+	sed -i -e 's/LOCK_UN/8/g' src/base/File.h && \
 	\
 	make && \
 	make install && \
