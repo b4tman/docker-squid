@@ -13,8 +13,8 @@ RUN set -x && \
 RUN apk add --no-cache \
 		libstdc++ \
 		libcap \
-		libcrypto1.0 \
-		libssl1.0 \
+		libressl2.5-libcrypto \
+		libressl2.5-libssl \
 		libltdl
 
 RUN set -x && \
@@ -26,12 +26,13 @@ RUN set -x && \
 		tzdata \
 		curl \
 		gnupg \
-		openssl-dev \
+		libressl-dev \
 		perl-dev \
 		autoconf \
 		automake \
 		make \
 		pkgconfig \
+		heimdal-dev \
 		libtool \
 		libcap-dev \
 		linux-headers && \
@@ -69,7 +70,7 @@ RUN set -x && \
 		--enable-auth-negotiate="wrapper" \
 		--enable-silent-rules \
 		--disable-mit \
-		--disable-heimdal \
+		--enable-heimdal \
 		--enable-delay-pools \
 		--enable-arp-acl \
 		--enable-openssl \
