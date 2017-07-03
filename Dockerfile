@@ -1,4 +1,4 @@
-FROM b4tman/armhf-alpine-qemu:3.5
+FROM b4tman/armhf-alpine-qemu:3.6
 MAINTAINER b4tman <b4tm4n@mail.ru>
 
 ENV SQUID_VER 3.5.26
