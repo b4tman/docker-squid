@@ -1,4 +1,4 @@
-FROM alpine:3.5
+FROM alpine:3.6
 MAINTAINER b4tman <b4tm4n@mail.ru>
 
 ENV SQUID_VER 4.0.20
