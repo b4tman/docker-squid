@@ -16,8 +16,8 @@ RUN apk add --no-cache \
 		libstdc++ \
 		heimdal-libs \
 		libcap \
-		libressl2.4-libcrypto \
-		libressl2.4-libssl \
+		libressl2.5-libcrypto \
+		libressl2.5-libssl \
 		libltdl
 
 RUN set -x && \
