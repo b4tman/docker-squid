@@ -6,8 +6,6 @@ Docker Squid container based on Alpine Linux.
 
 Automated builds of the image are available on [Dockerhub](https://hub.docker.com/r/b4tman/squid).
 
-> **Note**: [armhf](https://github.com/b4tman/docker-squid/tree/armhf) image is based on **experimental** [armhf/alpine](https://hub.docker.com/r/armhf/alpine/) image. 
-
 # Quick Start
 
 Just launch container:
