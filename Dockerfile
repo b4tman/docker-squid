@@ -95,8 +95,8 @@ RUN set -x && \
 		--with-large-files \
 		--with-default-user=squid \
 		--with-openssl \
-		--with-pidfile=/var/run/squid/squid.pid \
-	make && \
+		--with-pidfile=/var/run/squid/squid.pid && \
+	make -j $(grep -cs ^processor /proc/cpuinfo) && \
 	make install && \
 	install -d -o squid -g squid \
 		/var/cache/squid \
