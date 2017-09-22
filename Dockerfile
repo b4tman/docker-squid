@@ -1,30 +1,13 @@
-FROM alpine:3.6
-MAINTAINER b4tman <b4tm4n@mail.ru>
+FROM alpine:3.6 as build
 
 ENV SQUID_VER 3.5.27
 ENV SQUID_SIG_KEY EA31CC5E9488E5168D2DCC5EB268E706FF5CF463
-ENV SQUID_CONFIG_FILE /etc/squid/squid.conf
-ENV TZ Europe/Moscow
 
 RUN set -x && \
-	deluser squid 2>/dev/null; delgroup squid 2>/dev/null; \
-	addgroup -S squid -g 3128 && adduser -S -u 3128 -G squid -g squid -H -D -s /bin/false -h /var/cache/squid squid
-
-RUN apk add --no-cache \
-		libstdc++ \
-		heimdal-libs \
-		libcap \
-		libressl2.5-libcrypto \
-		libressl2.5-libssl \
-		libltdl
-
-RUN set -x && \
-	apk add --no-cache --virtual .build-deps  \
+	apk add --no-cache  \
 		gcc \
 		g++ \
 		libc-dev \
-		alpine-conf \
-		tzdata \
 		curl \
 		gnupg \
 		libressl-dev \
@@ -36,21 +19,29 @@ RUN set -x && \
 		heimdal-dev \
 		libtool \
 		libcap-dev \
-		linux-headers && \
-	\
+		linux-headers
+
+RUN set -x && \
 	mkdir -p /tmp/build && \
 	cd /tmp/build && \
     curl -SsL http://www.squid-cache.org/Versions/v${SQUID_VER%.*.*}/${SQUID_VER%.*}/squid-${SQUID_VER}.tar.gz -o squid-${SQUID_VER}.tar.gz && \
-	curl -SsL http://www.squid-cache.org/Versions/v${SQUID_VER%.*.*}/${SQUID_VER%.*}/squid-${SQUID_VER}.tar.gz.asc -o squid-${SQUID_VER}.tar.gz.asc	&& \
-	\
+	curl -SsL http://www.squid-cache.org/Versions/v${SQUID_VER%.*.*}/${SQUID_VER%.*}/squid-${SQUID_VER}.tar.gz.asc -o squid-${SQUID_VER}.tar.gz.asc	
+	
+RUN set -x && \
+	cd /tmp/build && \
 	export GNUPGHOME="$(mktemp -d)" && \
 	gpg --keyserver ha.pool.sks-keyservers.net --recv-keys ${SQUID_SIG_KEY}	&& \
 	gpg --batch --verify squid-${SQUID_VER}.tar.gz.asc squid-${SQUID_VER}.tar.gz && \
-	\
+	rm -rf "$GNUPGHOME"
+	
+RUN set -x && \
+	cd /tmp/build && \	
 	tar --strip 1 -xzf squid-${SQUID_VER}.tar.gz && \
-	export CFLAGS="-g0 -O2"   && \
-	export CXXFLAGS="$CFLAGS" && \
-	export LDFLAGS="-s" && \
+	\
+	CFLAGS="-g0 -O2" \
+	CXXFLAGS="-g0 -O2" \
+	LDFLAGS="-s" \
+	\
 	./configure \
 		--build="$(uname -m)" \
 		--host="$(uname -m)" \
@@ -95,24 +86,50 @@ RUN set -x && \
 		--with-large-files \
 		--with-default-user=squid \
 		--with-openssl \
-		--with-pidfile=/var/run/squid/squid.pid && \
+		--with-pidfile=/var/run/squid/squid.pid
+
+RUN set -x && \
+	cd /tmp/build && \
 	make -j $(grep -cs ^processor /proc/cpuinfo) && \
-	make install && \
-	install -d -o squid -g squid \
+	make install
+
+FROM alpine:3.6
+MAINTAINER b4tman <b4tm4n@mail.ru>
+	
+ENV SQUID_CONFIG_FILE /etc/squid/squid.conf
+ENV TZ Europe/Moscow
+
+RUN set -x && \
+	deluser squid 2>/dev/null; delgroup squid 2>/dev/null; \
+	addgroup -S squid -g 3128 && adduser -S -u 3128 -G squid -g squid -H -D -s /bin/false -h /var/cache/squid squid
+
+RUN apk add --no-cache \
+		libstdc++ \
+		heimdal-libs \
+		libcap \
+		libressl2.5-libcrypto \
+		libressl2.5-libssl \
+		libltdl	
+
+COPY --from=build /etc/squid/ /etc/squid/
+COPY --from=build /usr/lib/squid/ /usr/lib/squid/
+COPY --from=build /usr/share/squid/ /usr/share/squid/
+COPY --from=build /usr/sbin/squid /usr/sbin/squid
+		
+RUN install -d -o squid -g squid \
 		/var/cache/squid \
 		/var/log/squid \
 		/var/run/squid && \
-	chmod +x /usr/lib/squid/* &&\
-	\
-	/sbin/setup-timezone -z $TZ && \
-	\
-	apk del .build-deps && \
-	cd / && \
-	rm -rf /tmp/build "$GNUPGHOME"
-
+	chmod +x /usr/lib/squid/*
+	
 RUN echo 'include /etc/squid/conf.d/*.conf' >> "$SQUID_CONFIG_FILE" && \
 	install -d -m 755 -o squid -g squid /etc/squid/conf.d
 COPY squid-log.conf /etc/squid/conf.d/
+
+RUN	set -x && \
+	apk add --no-cache --virtual .tz alpine-conf tzdata && \ 
+	/sbin/setup-timezone -z $TZ && \
+	apk del .tz 	
 	
 VOLUME ["/var/cache/squid"]	
 EXPOSE 3128/tcp
