@@ -1,4 +1,4 @@
-FROM container4armhf/armhf-alpine:3.6
+FROM arm32v6/alpine:3.6
 MAINTAINER b4tman <b4tm4n@mail.ru>
 
 ENV SQUID_VER 3.5.27
