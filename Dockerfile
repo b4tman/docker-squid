@@ -1,4 +1,4 @@
-FROM b4tman/armhf-alpine-qemu:3.6 as build
+FROM b4tman/armhf-alpine-qemu:3.7 as build
 MAINTAINER b4tman <b4tm4n@mail.ru>
 
 ENV SQUID_VER 3.5.27
@@ -98,7 +98,7 @@ RUN set -x && \
 
 RUN [ "cross-build-end" ]
 
-FROM arm32v6/alpine:3.6
+FROM arm32v6/alpine:3.7
 	
 ENV SQUID_CONFIG_FILE /etc/squid/squid.conf
 ENV TZ Europe/Moscow
@@ -113,8 +113,8 @@ RUN apk add --no-cache \
 		libstdc++ \
 		heimdal-libs \
 		libcap \
-		libressl2.5-libcrypto \
-		libressl2.5-libssl \
+		libressl2.6-libcrypto \
+		libressl2.6-libssl \
 		libltdl	
 
 COPY --from=build /etc/squid/ /etc/squid/
