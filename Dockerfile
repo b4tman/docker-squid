@@ -1,4 +1,4 @@
-FROM arm32v6/alpine:3.6 as build
+FROM arm32v6/alpine:3.7 as build
 
 ENV SQUID_VER 3.5.27
 ENV SQUID_SIG_KEY EA31CC5E9488E5168D2DCC5EB268E706FF5CF463
@@ -93,7 +93,7 @@ RUN set -x && \
 	make -j $(grep -cs ^processor /proc/cpuinfo) && \
 	make install
 
-FROM arm32v6/alpine:3.6
+FROM arm32v6/alpine:3.7
 MAINTAINER b4tman <b4tm4n@mail.ru>
 	
 ENV SQUID_CONFIG_FILE /etc/squid/squid.conf
@@ -107,8 +107,8 @@ RUN apk add --no-cache \
 		libstdc++ \
 		heimdal-libs \
 		libcap \
-		libressl2.5-libcrypto \
-		libressl2.5-libssl \
+		libressl2.6-libcrypto \
+		libressl2.6-libssl \
 		libltdl	
 
 COPY --from=build /etc/squid/ /etc/squid/
