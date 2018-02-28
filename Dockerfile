@@ -1,4 +1,4 @@
-FROM alpine:3.6 as build
+FROM alpine:3.7 as build
 
 ENV SQUID_VER 4.0.21
 ENV SQUID_SIG_KEY B06884EDB779C89B044E64E3CD6DBF8EF3B17D3E
@@ -100,7 +100,7 @@ RUN set -x && \
 	make -j $(grep -cs ^processor /proc/cpuinfo) && \
 	make install
 
-FROM alpine:3.6
+FROM alpine:3.7
 	
 ENV SQUID_CONFIG_FILE /etc/squid/squid.conf
 ENV TZ Europe/Moscow
@@ -113,8 +113,8 @@ RUN apk add --no-cache \
 		libstdc++ \
 		heimdal-libs \
 		libcap \
-		libressl2.5-libcrypto \
-		libressl2.5-libssl \
+		libressl2.6-libcrypto \
+		libressl2.6-libssl \
 		libltdl	
 
 COPY --from=build /etc/squid/ /etc/squid/
