@@ -30,7 +30,11 @@ RUN set -x && \
 RUN set -x && \
 	cd /tmp/build && \
 	export GNUPGHOME="$(mktemp -d)" && \
-	gpg --keyserver ha.pool.sks-keyservers.net --recv-keys ${SQUID_SIG_KEY}	&& \
+	( \
+	 gpg --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys ${SQUID_SIG_KEY} || \
+     gpg --keyserver hkp://ipv4.pool.sks-keyservers.net   --recv-keys ${SQUID_SIG_KEY} ||  \
+     gpg --keyserver hkp://pgp.mit.edu:80                 --recv-keys ${SQUID_SIG_KEY} \
+	) && \
 	gpg --batch --verify squid-${SQUID_VER}.tar.gz.asc squid-${SQUID_VER}.tar.gz && \
 	rm -rf "$GNUPGHOME"
 	
