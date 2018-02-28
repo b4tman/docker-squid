@@ -94,7 +94,6 @@ RUN set -x && \
 	make install
 
 FROM arm32v6/alpine:3.7
-MAINTAINER b4tman <b4tm4n@mail.ru>
 	
 ENV SQUID_CONFIG_FILE /etc/squid/squid.conf
 ENV TZ Europe/Moscow
