@@ -101,7 +101,7 @@ RUN set -x && \
 
 RUN [ "cross-build-end" ]
 
-FROM arm32v6/alpine:3.7
+FROM b4tman/armhf-alpine-qemu:3.7
 	
 ENV SQUID_CONFIG_FILE /etc/squid/squid.conf
 ENV TZ Europe/Moscow
