@@ -99,7 +99,6 @@ RUN set -x && \
 RUN [ "cross-build-end" ]
 
 FROM arm32v6/alpine:3.6
-MAINTAINER b4tman <b4tm4n@mail.ru>
 	
 ENV SQUID_CONFIG_FILE /etc/squid/squid.conf
 ENV TZ Europe/Moscow
