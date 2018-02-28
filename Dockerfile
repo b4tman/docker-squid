@@ -94,7 +94,6 @@ RUN set -x && \
 	make install
 
 FROM alpine:3.6
-MAINTAINER b4tman <b4tm4n@mail.ru>
 	
 ENV SQUID_CONFIG_FILE /etc/squid/squid.conf
 ENV TZ Europe/Moscow
