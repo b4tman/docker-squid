@@ -24,8 +24,8 @@ RUN set -x && \
 RUN set -x && \
 	mkdir -p /tmp/build && \
 	cd /tmp/build && \
-    curl -SsL http://www.squid-cache.org/Versions/v${SQUID_VER%.*.*}/squid-${SQUID_VER}.tar.gz -o squid-${SQUID_VER}.tar.gz && \
-	curl -SsL http://www.squid-cache.org/Versions/v${SQUID_VER%.*.*}/squid-${SQUID_VER}.tar.gz.asc -o squid-${SQUID_VER}.tar.gz.asc	
+    curl -SsL http://www.squid-cache.org/Versions/v${SQUID_VER%%.*}/squid-${SQUID_VER}.tar.gz -o squid-${SQUID_VER}.tar.gz && \
+	curl -SsL http://www.squid-cache.org/Versions/v${SQUID_VER%%.*}/squid-${SQUID_VER}.tar.gz.asc -o squid-${SQUID_VER}.tar.gz.asc
 	
 RUN set -x && \
 	cd /tmp/build && \
