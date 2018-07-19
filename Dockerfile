@@ -1,6 +1,6 @@
 FROM b4tman/armhf-alpine-qemu:3.7 as build
 
-ENV SQUID_VER 3.5.27
+ENV SQUID_VER 3.5.28
 ENV SQUID_SIG_KEY EA31CC5E9488E5168D2DCC5EB268E706FF5CF463
 
 RUN [ "cross-build-start" ]
