@@ -93,8 +93,6 @@ RUN set -x && \
 		--with-openssl \
 		--with-pidfile=/var/run/squid/squid.pid
 
-RUN sed -i -e 's/LOCK_UN/8/g' /tmp/build/src/base/File.h
-
 RUN set -x && \
 	cd /tmp/build && \
 	make -j $(grep -cs ^processor /proc/cpuinfo) && \
