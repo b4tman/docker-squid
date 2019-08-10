@@ -98,6 +98,7 @@ RUN set -x && \
 	make -j $(grep -cs ^processor /proc/cpuinfo) && \
 	make install
 
+RUN sed -i '1s;^;include /etc/squid/conf.d/[0-4]*.conf\n;' /etc/squid/squid.conf
 RUN echo 'include /etc/squid/conf.d/[5-9]*.conf' >> /etc/squid/squid.conf
 
 FROM alpine:3.10.1
