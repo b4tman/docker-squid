@@ -98,6 +98,9 @@ RUN set -x && \
 	make -j $(grep -cs ^processor /proc/cpuinfo) && \
 	make install
 
+RUN sed -i '1s;^;include /etc/squid/conf.d/*.conf\n;' /etc/squid/squid.conf
+RUN echo 'include /etc/squid/conf.d.tail/*.conf' >> /etc/squid/squid.conf
+
 FROM alpine:3.10.1
 	
 ENV SQUID_CONFIG_FILE /etc/squid/squid.conf
@@ -126,9 +129,11 @@ RUN install -d -o squid -g squid \
 		/var/run/squid && \
 	chmod +x /usr/lib/squid/*
 	
-RUN echo 'include /etc/squid/conf.d/*.conf' >> "$SQUID_CONFIG_FILE" && \
-	install -d -m 755 -o squid -g squid /etc/squid/conf.d
-COPY squid-log.conf /etc/squid/conf.d/
+RUN install -d -m 755 -o squid -g squid \
+		/etc/squid/conf.d \
+		/etc/squid/conf.d.tail
+RUN touch /etc/squid/conf.d/placeholder.conf 
+COPY squid-log.conf /etc/squid/conf.d.tail/
 
 RUN	set -x && \
 	apk add --no-cache --virtual .tz alpine-conf tzdata && \ 
