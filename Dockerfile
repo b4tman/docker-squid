@@ -132,6 +132,7 @@ RUN install -d -o squid -g squid \
 RUN install -d -m 755 -o squid -g squid \
 		/etc/squid/conf.d \
 		/etc/squid/conf.d.tail
+RUN touch /etc/squid/conf.d/placeholder.conf 
 COPY squid-log.conf /etc/squid/conf.d.tail/
 
 RUN	set -x && \
