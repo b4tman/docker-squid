@@ -1,5 +1,6 @@
 [![](https://images.microbadger.com/badges/image/b4tman/squid.svg)](https://microbadger.com/images/b4tman/squid "Get your own image badge on microbadger.com")
 [![Dependabot Status](https://api.dependabot.com/badges/status?host=github&repo=b4tman/docker-squid)](https://dependabot.com)
+![Docker Build Status](https://img.shields.io/docker/build/b4tman/squid)
 
 # docker-squid
 
