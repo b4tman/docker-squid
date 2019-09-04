@@ -1,0 +1,23 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches:
+    - master
+    - v3
+    - v4
+  pull_request:
+    branches:
+    - master
+    - v3
+    - v4
+    
+jobs:
+  build: 
+    runs-on: ubuntu-18.04
+    steps:
+    - uses: actions/checkout@v1
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile --tag b4tman/squid:$(date +%s)
+    - name: Test image
+      run: docker-compose -f docker-compose.test.yml up sut
