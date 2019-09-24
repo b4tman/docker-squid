@@ -18,6 +18,21 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag b4tman/squid:$(date +%s)
+      run: docker build . --file Dockerfile --tag b4tman/squid
+      run: docker build ssl-bump --tag b4tman/squid:ssl-bump
     - name: Test image
       run: docker-compose -f docker-compose.test.yml up sut
+    - name: GituHub Packages - Docker Login
+      if:  github.event_name == 'push'
+      run: docker login docker.pkg.github.com -u ${{secrets.GITHUB_PKGS_LOGIN}} -p ${{secrets.GITHUB_PKGS_TOKEN}}
+    - name: GituHub Packages - Docker Tag
+      if:  github.event_name == 'push'
+      run: docker tag b4tman/squid docker.pkg.github.com/${{github.repository}}/squid:$(echo ${{github.ref}} | sed 's/.*\/.*\///')
+      run: docker tag b4tman/squid:ssl-bump docker.pkg.github.com/${{github.repository}}/ssl-bump:$(echo ${{github.ref}} | sed 's/.*\/.*\///')
+    - name: GituHub Packages - Docker Push
+      if:  github.event_name == 'push'
+      run: docker push b4tman/squid docker.pkg.github.com/${{github.repository}}/squid:$(echo ${{github.ref}} | sed 's/.*\/.*\///')
+      run: docker push b4tman/squid docker.pkg.github.com/${{github.repository}}/ssl-bump:$(echo ${{github.ref}} | sed 's/.*\/.*\///')
+    - name: GituHub Packages - Docker Logout
+      if:  github.event_name == 'push'
+      run: docker logout docker.pkg.github.com
