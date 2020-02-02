@@ -2,42 +2,82 @@ name: Docker Image CI
 
 on:
   push:
+    # Publish `master` as Docker `latest` image.
     branches:
-    - master
-    - v3
-    - v4
-  pull_request:
-    branches:
-    - master
-    - v3
-    - v4
+      - master
     
+    # Publish `v1.2.3` tags as releases.
+    tags:
+      - v*
+  
+  # Run tests for any PRs.
+  pull_request:
+  
 jobs:
-  build: 
+  test: 
     runs-on: ubuntu-18.04
     steps:
-    - uses: actions/checkout@v1
-    - name: Build the Docker image
+    - uses: actions/checkout@v2
+    
+    - name: Build squid image
       run: docker build . --file Dockerfile --tag b4tman/squid
+    
     - name: Test image
       run: docker-compose -f docker-compose.test.yml up sut
-    - name: Build 'ssl-bump' Docker image
+    
+    - name: Build 'ssl-bump' image
       run: docker build ssl-bump --tag b4tman/squid:ssl-bump
-    - name: GituHub Packages - Docker Login
-      if:  github.event_name == 'push'
-      run: docker login docker.pkg.github.com -u b4tman -p ${{secrets.GITHUB_PKGS_TOKEN}}
-    - name: GituHub Packages - Docker Tag
-      if:  github.event_name == 'push'
-      run: docker tag b4tman/squid docker.pkg.github.com/${{github.repository}}/squid:$(echo ${{github.ref}} | sed 's/.*\/.*\///')
-    - name: GituHub Packages - Docker Tag 'ssl-bump'
-      if:  github.event_name == 'push'
-      run: docker tag b4tman/squid:ssl-bump docker.pkg.github.com/${{github.repository}}/ssl-bump:$(echo ${{github.ref}} | sed 's/.*\/.*\///')
-    - name: GituHub Packages - Docker Push
-      if:  github.event_name == 'push'
-      run: docker push docker.pkg.github.com/${{github.repository}}/squid:$(echo ${{github.ref}} | sed 's/.*\/.*\///')
-    - name: GituHub Packages - Docker Push 'ssl-bump'
-      if:  github.event_name == 'push'
-      run: docker push docker.pkg.github.com/${{github.repository}}/ssl-bump:$(echo ${{github.ref}} | sed 's/.*\/.*\///')
-    - name: GituHub Packages - Docker Logout
-      if:  github.event_name == 'push'
-      run: docker logout docker.pkg.github.com
+  
+  push:
+    needs: test
+    runs-on: ubuntu-18.04
+    if: github.event_name == 'push'
+    
+    - uses: actions/checkout@v2
+    
+    - name: Build squid image
+      run: docker build . --file Dockerfile --tag b4tman/squid
+    
+    - name: Build 'ssl-bump' image
+      run: docker build ssl-bump --tag b4tman/squid:ssl-bump
+    
+    - name: Log into registry
+      run: echo "${{ secrets.GITHUB_PKGS_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
+    
+    - name: Push squid image
+      run: |
+        IMAGE_ID=docker.pkg.github.com/${{ github.repository }}/squid
+      
+        # Strip git ref prefix from version
+        VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+      
+        # Strip "v" prefix from tag name
+        [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+      
+        # Use Docker `latest` tag convention
+        [ "$VERSION" == "master" ] && VERSION=latest
+      
+        echo IMAGE_ID=$IMAGE_ID
+        echo VERSION=$VERSION
+      
+        docker tag b4tman/squid $IMAGE_ID:$VERSION
+        docker push $IMAGE_ID:$VERSION
+    
+    - name: Push 'ssl-bump' image
+      run: |
+        IMAGE_ID=docker.pkg.github.com/${{ github.repository }}/ssl-bump
+      
+        # Strip git ref prefix from version
+        VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+      
+        # Strip "v" prefix from tag name
+        [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+      
+        # Use Docker `latest` tag convention
+        [ "$VERSION" == "master" ] && VERSION=latest
+      
+        echo IMAGE_ID=$IMAGE_ID
+        echo VERSION=$VERSION
+      
+        docker tag b4tman/squid:ssl-bump $IMAGE_ID:$VERSION
+        docker push $IMAGE_ID:$VERSION
