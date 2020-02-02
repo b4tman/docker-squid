@@ -22,6 +22,7 @@ COPY squid /tmp/build
 WORKDIR /tmp/build/
 
 RUN set -x && \
+	sh bootstrap.sh && \
 	\
 	CFLAGS="-g0 -O2" \
 	CXXFLAGS="-g0 -O2" \
