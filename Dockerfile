@@ -18,7 +18,7 @@ RUN set -x && \
 		libcap-dev \
 		linux-headers
 
-COPY squid/ /tmp/build/
+COPY squid /tmp/build
 WORKDIR /tmp/build/
 
 RUN set -x && \
