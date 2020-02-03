@@ -21,9 +21,10 @@ RUN set -x && \
 COPY squid /tmp/build
 WORKDIR /tmp/build/
 
-RUN set -x && \
-	sh bootstrap.sh && \
-	\
+RUN sed -i 's/ed -s/ed/g' bootstrap.sh
+RUN sh bootstrap.sh
+
+RUN \
 	CFLAGS="-g0 -O2" \
 	CXXFLAGS="-g0 -O2" \
 	LDFLAGS="-s" \
