@@ -22,6 +22,7 @@ COPY squid /tmp/build
 WORKDIR /tmp/build/
 
 RUN sed -i 's/ed -s/ed/g' bootstrap.sh
+RUN ln -s /usr/bin/aclocal-1.16 /usr/bin/aclocal-1.15
 RUN sh bootstrap.sh
 
 RUN \
