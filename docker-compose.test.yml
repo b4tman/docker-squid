@@ -1,0 +1,11 @@
+version: '2'
+services:
+  proxy:
+    build: .
+  sut:
+    image: alpine:3.10.1
+    links: 
+      - proxy
+    depends_on:
+      - proxy
+    command: sh -exc "apk add --update curl && sleep 5 && exec curl --proxy http://proxy:3128 -I http://google.com/"

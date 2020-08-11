@@ -1,7 +1,7 @@
-FROM arm32v6/alpine:3.8 as build
+FROM --platform=linux/armhf alpine:3.12.0 as build
 
-ENV SQUID_VER 3.5.28
-ENV SQUID_SIG_KEY EA31CC5E9488E5168D2DCC5EB268E706FF5CF463
+ENV SQUID_VER 4.12
+ENV SQUID_SIG_KEY B06884EDB779C89B044E64E3CD6DBF8EF3B17D3E
 
 RUN set -x && \
 	apk add --no-cache  \
@@ -24,8 +24,8 @@ RUN set -x && \
 RUN set -x && \
 	mkdir -p /tmp/build && \
 	cd /tmp/build && \
-    curl -SsL http://www.squid-cache.org/Versions/v${SQUID_VER%.*.*}/${SQUID_VER%.*}/squid-${SQUID_VER}.tar.gz -o squid-${SQUID_VER}.tar.gz && \
-	curl -SsL http://www.squid-cache.org/Versions/v${SQUID_VER%.*.*}/${SQUID_VER%.*}/squid-${SQUID_VER}.tar.gz.asc -o squid-${SQUID_VER}.tar.gz.asc	
+    curl -SsL http://www.squid-cache.org/Versions/v${SQUID_VER%%.*}/squid-${SQUID_VER}.tar.gz -o squid-${SQUID_VER}.tar.gz && \
+	curl -SsL http://www.squid-cache.org/Versions/v${SQUID_VER%%.*}/squid-${SQUID_VER}.tar.gz.asc -o squid-${SQUID_VER}.tar.gz.asc
 	
 RUN set -x && \
 	cd /tmp/build && \
@@ -71,6 +71,7 @@ RUN set -x && \
 		--enable-arp-acl \
 		--enable-openssl \
 		--enable-ssl-crtd \
+		--enable-security-cert-generators="file" \
 		--enable-ident-lookups \
 		--enable-useragent-log \
 		--enable-cache-digests \
@@ -97,7 +98,10 @@ RUN set -x && \
 	make -j $(grep -cs ^processor /proc/cpuinfo) && \
 	make install
 
-FROM arm32v6/alpine:3.8
+RUN sed -i '1s;^;include /etc/squid/conf.d/*.conf\n;' /etc/squid/squid.conf
+RUN echo 'include /etc/squid/conf.d.tail/*.conf' >> /etc/squid/squid.conf
+
+FROM --platform=linux/armhf alpine:3.12.0
 	
 ENV SQUID_CONFIG_FILE /etc/squid/squid.conf
 ENV TZ Europe/Moscow
@@ -110,8 +114,8 @@ RUN apk add --no-cache \
 		libstdc++ \
 		heimdal-libs \
 		libcap \
-		libressl2.7-libcrypto \
-		libressl2.7-libssl \
+		libressl3.1-libcrypto \
+		libressl3.1-libssl \
 		libltdl	
 
 COPY --from=build /etc/squid/ /etc/squid/
@@ -125,9 +129,11 @@ RUN install -d -o squid -g squid \
 		/var/run/squid && \
 	chmod +x /usr/lib/squid/*
 	
-RUN echo 'include /etc/squid/conf.d/*.conf' >> "$SQUID_CONFIG_FILE" && \
-	install -d -m 755 -o squid -g squid /etc/squid/conf.d
-COPY squid-log.conf /etc/squid/conf.d/
+RUN install -d -m 755 -o squid -g squid \
+		/etc/squid/conf.d \
+		/etc/squid/conf.d.tail
+RUN touch /etc/squid/conf.d/placeholder.conf 
+COPY squid-log.conf /etc/squid/conf.d.tail/
 
 RUN	set -x && \
 	apk add --no-cache --virtual .tz alpine-conf tzdata && \ 
@@ -139,4 +145,4 @@ EXPOSE 3128/tcp
 
 USER squid
 
-CMD ["sh", "-c", "/usr/sbin/squid -f ${SQUID_CONFIG_FILE} -z && exec /usr/sbin/squid -f ${SQUID_CONFIG_FILE} -NYCd 1"]
+CMD ["sh", "-c", "/usr/sbin/squid -f ${SQUID_CONFIG_FILE} --foreground -z && exec /usr/sbin/squid -f ${SQUID_CONFIG_FILE} --foreground -YCd 1"]
