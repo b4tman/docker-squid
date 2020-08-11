@@ -1,7 +1,7 @@
 version: '2'
 services:
   squid:
-    image: 'b4tman/squid:armhf'
+    image: 'b4tman/squid:armhf-cross'
     container_name: 'my-squid'
     restart: always
     ports:
