@@ -63,7 +63,7 @@ RUN set -x && \
 		--enable-epoll \
 		--enable-external-acl-helpers="file_userip,unix_group,wbinfo_group" \
 		--enable-auth-ntlm="fake" \
-		--enable-auth-negotiate="wrapper" \
+		--enable-auth-negotiate="kerberos,wrapper" \
 		--enable-silent-rules \
 		--disable-mit \
 		--enable-heimdal \
