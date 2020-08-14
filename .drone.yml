@@ -10,8 +10,7 @@ steps:
   image: plugins/docker
   settings:
     repo: b4tman/squid
-    auto_tag: true
-    auto_tag_suffix: armhf
+    tags: "${DRONE_COMMIT_SHA}-armhf"
     dry_run: true
 trigger:
   branch:
