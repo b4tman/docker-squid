@@ -1,0 +1,18 @@
+---
+kind: pipeline
+type: docker
+name: squid arm32
+platform:
+  os: linux
+  arch: arm
+steps:
+- name: docker
+  image: plugins/docker
+  settings:
+    repo: b4tman/squid
+    auto_tag: true
+    auto_tag_suffix: armhf
+    dry_run: true
+trigger:
+  branch:
+    - master
