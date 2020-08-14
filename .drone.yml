@@ -15,4 +15,8 @@ steps:
     dry_run: true
 trigger:
   branch:
+    include:
     - master
+  ref:
+    include:
+    - refs/pull/30
