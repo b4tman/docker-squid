@@ -14,8 +14,7 @@ steps:
     auto_tag_suffix: armhf
     pull_image: true
     registry: docker.io
-    username:
-      from_secret: docker_username
+    username: b4tman
     password:
       from_secret: docker_password
 - name: squid-armhf image for github packages
@@ -25,10 +24,9 @@ steps:
     auto_tag: true
     pull_image: true
     registry: docker.pkg.github.com
-    username:
-      from_secret: github_login
+    username: b4tman
     password:
-      from_secret: github_token
+      from_secret: github_password
 trigger:
   ref:
   - refs/tags/**
