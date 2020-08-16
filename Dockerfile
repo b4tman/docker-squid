@@ -95,7 +95,8 @@ RUN set -x && \
 
 RUN set -x && \
 	cd /tmp/build && \
-	make -j $(grep -cs ^processor /proc/cpuinfo) && \
+	nproc=$(n=$(nproc) ; max_n=6 ; [ $n -le $max_n ] && echo $n || echo $max_n) && \
+	make -j $nproc && \
 	make install
 
 RUN sed -i '1s;^;include /etc/squid/conf.d/*.conf\n;' /etc/squid/squid.conf
