@@ -1,4 +1,3 @@
-[![Dependabot Status](https://api.dependabot.com/badges/status?host=github&repo=b4tman/docker-squid)](https://dependabot.com)
 ![Docker Build Status](https://img.shields.io/docker/build/b4tman/squid)
 ![Docker Image CI Status](https://github.com/b4tman/docker-squid/workflows/Docker%20Image%20CI/badge.svg)
 
