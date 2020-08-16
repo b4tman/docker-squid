@@ -9,14 +9,15 @@ steps:
 - name: squid image for dockerhub
   image: plugins/docker
   settings:
-    repo: b4tman/squid
+    repo: docker.io/b4tman/squid
     auto_tag: true
     auto_tag_suffix: armhf
     pull_image: true
+    registry: docker.io
     username:
-      from_secret: dockerhub_login
+      from_secret: docker_username
     password:
-      from_secret: dockerhub_token
+      from_secret: docker_password
 - name: squid-armhf image for github packages
   image: plugins/docker
   settings:
