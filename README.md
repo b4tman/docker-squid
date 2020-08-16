@@ -1,3 +1,4 @@
+[![Drone Build Status](https://cloud.drone.io/api/badges/b4tman/docker-squid/status.svg?ref=refs/heads/master)](https://cloud.drone.io/b4tman/docker-squid)
 ![Docker Build Status](https://img.shields.io/docker/build/b4tman/squid)
 ![Docker Image CI Status](https://github.com/b4tman/docker-squid/workflows/Docker%20Image%20CI/badge.svg)
 
