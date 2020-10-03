@@ -93,11 +93,13 @@ RUN set -x && \
 		--with-openssl \
 		--with-pidfile=/var/run/squid/squid.pid
 
+
 RUN set -x && \
 	cd /tmp/build && \
 	nproc=$(n=$(nproc) ; max_n=6 ; [ $n -le $max_n ] && echo $n || echo $max_n) && \
 	make -j $nproc && \
-	make install
+	make install && \
+	cd tools/squidclient && make && make install-strip
 
 RUN sed -i '1s;^;include /etc/squid/conf.d/*.conf\n;' /etc/squid/squid.conf
 RUN echo 'include /etc/squid/conf.d.tail/*.conf' >> /etc/squid/squid.conf
@@ -123,6 +125,8 @@ COPY --from=build /etc/squid/ /etc/squid/
 COPY --from=build /usr/lib/squid/ /usr/lib/squid/
 COPY --from=build /usr/share/squid/ /usr/share/squid/
 COPY --from=build /usr/sbin/squid /usr/sbin/squid
+COPY --from=build /usr/bin/squidclient /usr/bin/squidclient
+
 		
 RUN install -d -o squid -g squid \
 		/var/cache/squid \
