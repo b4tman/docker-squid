@@ -42,11 +42,11 @@ jobs:
       run: docker build ssl-bump --tag b4tman/squid:ssl-bump
     
     - name: Log into registry
-      run: echo "${{ secrets.GITHUB_PKGS_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
+      run: echo "${{ secrets.CR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
     
     - name: Push squid image
       run: |
-        IMAGE_ID=docker.pkg.github.com/${{ github.repository }}/squid
+        IMAGE_ID=ghcr.io/${{ github.actor }}/squid
       
         # Strip git ref prefix from version
         VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
@@ -65,7 +65,7 @@ jobs:
     
     - name: Push 'ssl-bump' image
       run: |
-        IMAGE_ID=docker.pkg.github.com/${{ github.repository }}/ssl-bump
+        IMAGE_ID=ghcr.io/${{ github.actor }}/squid-ssl-bump
       
         # Strip git ref prefix from version
         VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
