@@ -1,4 +1,4 @@
-FROM alpine:3.12.1 as build
+FROM alpine:3.12.3 as build
 
 ENV SQUID_VER 4.13
 ENV SQUID_SIG_KEY B06884EDB779C89B044E64E3CD6DBF8EF3B17D3E
@@ -104,7 +104,7 @@ RUN set -x && \
 RUN sed -i '1s;^;include /etc/squid/conf.d/*.conf\n;' /etc/squid/squid.conf
 RUN echo 'include /etc/squid/conf.d.tail/*.conf' >> /etc/squid/squid.conf
 
-FROM alpine:3.12.1
+FROM alpine:3.12.3
 	
 ENV SQUID_CONFIG_FILE /etc/squid/squid.conf
 ENV TZ Europe/Moscow
