@@ -17,6 +17,8 @@ steps:
     username: b4tman
     password:
       from_secret: docker_password
+    config:
+      from_secret: docker_config
 - name: squid-armhf image for github packages
   image: plugins/docker
   settings:
@@ -27,6 +29,8 @@ steps:
     username: b4tman
     password:
       from_secret: github_password
+    config:
+      from_secret: docker_config
 trigger:
   ref:
   - refs/tags/**
