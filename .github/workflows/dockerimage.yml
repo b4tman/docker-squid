@@ -15,6 +15,12 @@ on:
     branches:
       - "master"
 
+
+env:
+  CACHE_IMAGE: b4tman/squid-ci-cache
+  DOCKER_BUILDKIT: 1
+  COMPOSE_DOCKER_CLI_BUILD: 1
+
 jobs:
   test:
     runs-on: ubuntu-20.04
@@ -59,6 +65,9 @@ jobs:
         run: |
           rm -rf /tmp/.buildx-cache
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+
+      - name: Build image for test
+        run: docker-compose -f docker-compose.test.yml build --build-arg BUILDKIT_INLINE_CACHE=1
 
       - name: Test image
         run: docker-compose -f docker-compose.test.yml up sut
