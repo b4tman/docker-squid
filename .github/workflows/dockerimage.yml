@@ -162,7 +162,6 @@ jobs:
         with:
           context: .
           push: true
-          platforms: linux/amd64,linux/arm/v7
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=local,src=/tmp/.buildx-cache
@@ -182,7 +181,6 @@ jobs:
           context: ssl-bump
           push: true
           file: ssl-bump/Dockerfile
-          platforms: linux/amd64,linux/arm/v7
           tags: ${{ steps.meta_ssl_bump.outputs.tags }}
           labels: ${{ steps.meta_ssl_bump.outputs.labels }}
           cache-from: type=local,src=/tmp/.buildx-cache
