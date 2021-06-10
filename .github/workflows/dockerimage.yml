@@ -213,10 +213,3 @@ jobs:
         run: |
           rm -rf /tmp/.buildx-cache
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
-
-      - name: Update repo description
-        uses: peter-evans/dockerhub-description@v2
-        with:
-          username: b4tman
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-          repository: b4tman/squid
