@@ -221,4 +221,4 @@ jobs:
         with:
           username: b4tman
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-          repository: b4tman/app
+          repository: b4tman/squid
