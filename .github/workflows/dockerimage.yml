@@ -5,79 +5,220 @@ on:
     # Publish `master` as Docker `latest` image.
     branches:
       - master
-    
+
     # Publish `v1.2.3` tags as releases.
     tags:
       - v*
-  
-  # Run tests for any PRs.
+
+  # Run tests for PRs to `master` branch.
   pull_request:
-  
+    branches:
+      - "master"
+
 jobs:
-  test: 
-    runs-on: ubuntu-18.04
+  test:
+    runs-on: ubuntu-20.04
     steps:
-    - uses: actions/checkout@v2
-    
-    - name: Build squid image
-      run: docker build . --file Dockerfile --tag b4tman/squid
-    
-    - name: Test image
-      run: docker-compose -f docker-compose.test.yml up sut
-    
-    - name: Build 'ssl-bump' image
-      run: docker build ssl-bump --tag b4tman/squid:ssl-bump
-  
+      - uses: actions/checkout@v2
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to DockerHub
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v1
+        with:
+          username: b4tman
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Build squid image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: false
+          tags: b4tman/squid
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new
+          outputs: type=image,name=b4tman/squid,push=false
+
+      # Temp fix
+      # https://github.com/docker/build-push-action/issues/252
+      # https://github.com/moby/buildkit/issues/1896
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+
+      - name: Test image
+        run: docker-compose -f docker-compose.test.yml up sut
+
+      - name: Build 'ssl-bump' image
+        uses: docker/build-push-action@v2
+        with:
+          context: ssl-bump
+          push: false
+          file: ssl-bump/Dockerfile
+          tags: b4tman/squid:ssl-bump
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new
+
+      # Temp fix
+      # https://github.com/docker/build-push-action/issues/252
+      # https://github.com/moby/buildkit/issues/1896
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+
   push:
     needs: test
-    runs-on: ubuntu-18.04
-    if: github.event_name == 'push'
+    runs-on: ubuntu-20.04
+    if: github.event_name != 'pull_request'
     steps:
-    - uses: actions/checkout@v2
-    
-    - name: Build squid image
-      run: docker build . --file Dockerfile --tag b4tman/squid
-    
-    - name: Build 'ssl-bump' image
-      run: docker build ssl-bump --tag b4tman/squid:ssl-bump
-    
-    - name: Log into registry
-      run: echo "${{ secrets.CR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-    
-    - name: Push squid image
-      run: |
-        IMAGE_ID=ghcr.io/${{ github.actor }}/squid
-      
-        # Strip git ref prefix from version
-        VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
-      
-        # Strip "v" prefix from tag name
-        [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
-      
-        # Use Docker `latest` tag convention
-        [ "$VERSION" == "master" ] && VERSION=latest
-      
-        echo IMAGE_ID=$IMAGE_ID
-        echo VERSION=$VERSION
-      
-        docker tag b4tman/squid $IMAGE_ID:$VERSION
-        docker push $IMAGE_ID:$VERSION
-    
-    - name: Push 'ssl-bump' image
-      run: |
-        IMAGE_ID=ghcr.io/${{ github.actor }}/squid-ssl-bump
-      
-        # Strip git ref prefix from version
-        VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
-      
-        # Strip "v" prefix from tag name
-        [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
-      
-        # Use Docker `latest` tag convention
-        [ "$VERSION" == "master" ] && VERSION=latest
-      
-        echo IMAGE_ID=$IMAGE_ID
-        echo VERSION=$VERSION
-      
-        docker tag b4tman/squid:ssl-bump $IMAGE_ID:$VERSION
-        docker push $IMAGE_ID:$VERSION
+      - uses: actions/checkout@v2
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: |
+            b4tman/squid
+            ghcr.io/b4tman/squid
+          flavor: |
+            latest=auto
+          tags: |
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+
+      - name: Docker meta (ssl-bump)
+        id: meta_ssl_bump
+        uses: docker/metadata-action@v3
+        with:
+          images: |
+            b4tman/squid
+            ghcr.io/b4tman/squid
+          flavor: |
+            latest=auto
+            suffix=ssl-bump
+          tags: |
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+
+      - name: Docker meta (ssl-bump ghcr)
+        id: meta_ssl_bump_ghcr
+        uses: docker/metadata-action@v3
+        with:
+          images: |
+            ghcr.io/b4tman/squid-ssl-bump
+          flavor: |
+            latest=auto
+          tags: |
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: b4tman
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Login to GHCR
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.CR_PAT }}
+
+      - name: Build squid image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          platforms: linux/amd64,linux/arm/v7
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new
+
+      # Temp fix
+      # https://github.com/docker/build-push-action/issues/252
+      # https://github.com/moby/buildkit/issues/1896
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+
+      - name: Build 'ssl-bump' image
+        uses: docker/build-push-action@v2
+        with:
+          context: ssl-bump
+          push: true
+          file: ssl-bump/Dockerfile
+          platforms: linux/amd64,linux/arm/v7
+          tags: ${{ steps.meta_ssl_bump.outputs.tags }}
+          labels: ${{ steps.meta_ssl_bump.outputs.labels }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new
+
+      # Temp fix
+      # https://github.com/docker/build-push-action/issues/252
+      # https://github.com/moby/buildkit/issues/1896
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+
+      - name: Build 'ssl-bump' image for ghcr
+        uses: docker/build-push-action@v2
+        with:
+          context: ssl-bump
+          push: true
+          file: ssl-bump/Dockerfile
+          platforms: linux/amd64,linux/arm/v7
+          tags: ${{ steps.meta_ssl_bump_ghcr.outputs.tags }}
+          labels: ${{ steps.meta_ssl_bump_ghcr.outputs.labels }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new
+
+      # Temp fix
+      # https://github.com/docker/build-push-action/issues/252
+      # https://github.com/moby/buildkit/issues/1896
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+
+      - name: Update repo description
+        uses: peter-evans/dockerhub-description@v2
+        with:
+          username: b4tman
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: b4tman/app
