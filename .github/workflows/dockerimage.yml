@@ -50,8 +50,24 @@ jobs:
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new
 
+      # Temp fix
+      # https://github.com/docker/build-push-action/issues/252
+      # https://github.com/moby/buildkit/issues/1896
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+
       - name: Test image
         run: docker-compose -f docker-compose.test.yml up sut
+
+      # Temp fix
+      # https://github.com/docker/build-push-action/issues/252
+      # https://github.com/moby/buildkit/issues/1896
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
       - name: Build 'ssl-bump' image
         uses: docker/build-push-action@v2
@@ -152,11 +168,19 @@ jobs:
         with:
           context: .
           push: true
-          platforms: linux/amd64,linux/arm32
+          platforms: linux/amd64,linux/arm/v7
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new
+
+      # Temp fix
+      # https://github.com/docker/build-push-action/issues/252
+      # https://github.com/moby/buildkit/issues/1896
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
       - name: Build 'ssl-bump' image
         uses: docker/build-push-action@v2
@@ -164,11 +188,19 @@ jobs:
           context: ssl-bump
           push: true
           file: ssl-bump/Dockerfile
-          platforms: linux/amd64,linux/arm32
+          platforms: linux/amd64,linux/arm/v7
           tags: ${{ steps.meta_ssl_bump.outputs.tags }}
           labels: ${{ steps.meta_ssl_bump.outputs.labels }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new
+
+      # Temp fix
+      # https://github.com/docker/build-push-action/issues/252
+      # https://github.com/moby/buildkit/issues/1896
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
       - name: Build 'ssl-bump' image for ghcr
         uses: docker/build-push-action@v2
@@ -176,7 +208,7 @@ jobs:
           context: ssl-bump
           push: true
           file: ssl-bump/Dockerfile
-          platforms: linux/amd64,linux/arm32
+          platforms: linux/amd64,linux/arm/v7
           tags: ${{ steps.meta_ssl_bump_ghcr.outputs.tags }}
           labels: ${{ steps.meta_ssl_bump_ghcr.outputs.labels }}
           cache-from: type=local,src=/tmp/.buildx-cache
