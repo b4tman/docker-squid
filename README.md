@@ -6,7 +6,14 @@
 
 Docker Squid container based on Alpine Linux.
 
-Automated builds of the image are available on [Dockerhub](https://hub.docker.com/r/b4tman/squid).
+Automated builds of the image are available on:
+
+- DockerHub:
+  - [b4tman/squid](https://hub.docker.com/r/b4tman/squid)
+- Github:
+  - [ghcr.io/b4tman/squid](https://github.com/users/b4tman/packages/container/package/squid)
+  - [ghcr.io/b4tman/squid-armhf](https://github.com/users/b4tman/packages/container/package/squid-armhf)
+  - [ghcr.io/b4tman/squid-ssl-bump](https://github.com/users/b4tman/packages/container/package/squid-ssl-bump)
 
 # Quick Start
 
@@ -29,7 +36,6 @@ docker-compose up
 
 - **SQUID_CONFIG_FILE**: Specify the configuration file for squid. Defaults to `/etc/squid/squid.conf`.
 
-
 ## Example:
 
 ```bash
@@ -39,4 +45,4 @@ docker run -p 3128:3128 \
 	b4tman/squid
 ```
 
-This will start a squid container with your config file `/srv/docker/squid/squid.conf`. 
+This will start a squid container with your config file `/srv/docker/squid/squid.conf`.
