@@ -96,7 +96,7 @@ jobs:
             b4tman/squid
             ghcr.io/b4tman/squid
           flavor: |
-            latest=${{ github.ref == 'refs/heads/main' }}
+            latest=${{ github.ref == 'refs/heads/master' }}
           tags: |
             type=ref,event=branch
             type=semver,pattern={{version}}
@@ -124,7 +124,7 @@ jobs:
           images: |
             ghcr.io/b4tman/squid-ssl-bump
           flavor: |
-            latest=${{ github.ref == 'refs/heads/main' }}
+            latest=${{ github.ref == 'refs/heads/master' }}
           tags: |
             type=ref,event=branch
             type=semver,pattern={{version}}
