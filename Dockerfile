@@ -3,6 +3,11 @@ FROM alpine:3.14.0 as build
 ENV SQUID_VER 4.15
 ENV SQUID_SIG_KEY B06884EDB779C89B044E64E3CD6DBF8EF3B17D3E
 
+# fix conflict with libretls and libressl
+RUN set -x && \
+	apk add --no-cache libretls && \
+	apk upgrade --no-cache libretls
+
 RUN set -x && \
 	apk add --no-cache  \
 		gcc \
@@ -112,6 +117,11 @@ ENV TZ Europe/Moscow
 RUN set -x && \
 	deluser squid 2>/dev/null; delgroup squid 2>/dev/null; \
 	addgroup -S squid -g 3128 && adduser -S -u 3128 -G squid -g squid -H -D -s /bin/false -h /var/cache/squid squid
+
+# fix conflict with libretls and libressl
+RUN set -x && \
+	apk add --no-cache libretls && \
+	apk upgrade --no-cache libretls
 
 RUN apk add --no-cache \
 		libstdc++ \
