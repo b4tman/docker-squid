@@ -1,7 +1,6 @@
 FROM alpine:3.14.0 as build
 
 ENV SQUID_VER 4.15
-ENV SQUID_SIG_KEY B06884EDB779C89B044E64E3CD6DBF8EF3B17D3E
 
 # fix conflict with libretls and libressl
 RUN set -x && \
@@ -31,15 +30,13 @@ RUN set -x && \
 	cd /tmp/build && \
     curl -SsL http://www.squid-cache.org/Versions/v${SQUID_VER%%.*}/squid-${SQUID_VER}.tar.gz -o squid-${SQUID_VER}.tar.gz && \
 	curl -SsL http://www.squid-cache.org/Versions/v${SQUID_VER%%.*}/squid-${SQUID_VER}.tar.gz.asc -o squid-${SQUID_VER}.tar.gz.asc
-	
+
+COPY squid-keys.asc /tmp
+
 RUN set -x && \
 	cd /tmp/build && \
 	export GNUPGHOME="$(mktemp -d)" && \
-	( \
-	 gpg --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys ${SQUID_SIG_KEY} || \
-     gpg --keyserver hkp://ipv4.pool.sks-keyservers.net   --recv-keys ${SQUID_SIG_KEY} ||  \
-     gpg --keyserver hkp://pgp.mit.edu:80                 --recv-keys ${SQUID_SIG_KEY} \
-	) && \
+	gpg --import /tmp/squid-keys.asc && \
 	gpg --batch --verify squid-${SQUID_VER}.tar.gz.asc squid-${SQUID_VER}.tar.gz && \
 	rm -rf "$GNUPGHOME"
 	
