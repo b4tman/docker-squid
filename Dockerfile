@@ -1,6 +1,6 @@
 FROM alpine:3.14.0 as build
 
-ENV SQUID_VER 4.15
+ENV SQUID_VER 4.16
 
 # fix conflict with libretls and libressl
 RUN set -x && \
