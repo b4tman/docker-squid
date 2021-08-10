@@ -1,0 +1,37 @@
+---
+kind: pipeline
+type: docker
+name: arm32 images
+platform:
+  os: linux
+  arch: arm
+steps:
+- name: squid image for dockerhub
+  image: plugins/docker
+  settings:
+    repo: docker.io/b4tman/squid
+    auto_tag: true
+    auto_tag_suffix: armhf
+    pull_image: true
+    registry: docker.io
+    username: b4tman
+    password:
+      from_secret: docker_password
+    config:
+      from_secret: docker_config
+- name: squid-armhf image for github packages
+  image: plugins/docker
+  settings:
+    repo: ghcr.io/b4tman/squid-armhf
+    auto_tag: true
+    pull_image: true
+    registry: ghcr.io
+    username: b4tman
+    password:
+      from_secret: github_password
+    config:
+      from_secret: docker_config
+trigger:
+  ref:
+  - refs/tags/**
+  - refs/heads/master

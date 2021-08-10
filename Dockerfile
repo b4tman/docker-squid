@@ -1,7 +1,11 @@
-FROM alpine:3.11.3 as build
+FROM alpine:3.14.0 as build
 
 ENV SQUID_VER 5.0.1
-ENV SQUID_SIG_KEY B06884EDB779C89B044E64E3CD6DBF8EF3B17D3E
+
+# fix conflict with libretls and libressl
+RUN set -x && \
+	apk add --no-cache libretls && \
+	apk upgrade --no-cache libretls
 
 RUN set -x && \
 	apk add --no-cache  \
@@ -26,15 +30,13 @@ RUN set -x && \
 	cd /tmp/build && \
     curl -SsL http://www.squid-cache.org/Versions/v${SQUID_VER%%.*}/squid-${SQUID_VER}.tar.gz -o squid-${SQUID_VER}.tar.gz && \
 	curl -SsL http://www.squid-cache.org/Versions/v${SQUID_VER%%.*}/squid-${SQUID_VER}.tar.gz.asc -o squid-${SQUID_VER}.tar.gz.asc
-	
+
+COPY squid-keys.asc /tmp
+
 RUN set -x && \
 	cd /tmp/build && \
 	export GNUPGHOME="$(mktemp -d)" && \
-	( \
-	 gpg --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys ${SQUID_SIG_KEY} || \
-     gpg --keyserver hkp://ipv4.pool.sks-keyservers.net   --recv-keys ${SQUID_SIG_KEY} ||  \
-     gpg --keyserver hkp://pgp.mit.edu:80                 --recv-keys ${SQUID_SIG_KEY} \
-	) && \
+	gpg --import /tmp/squid-keys.asc && \
 	gpg --batch --verify squid-${SQUID_VER}.tar.gz.asc squid-${SQUID_VER}.tar.gz && \
 	rm -rf "$GNUPGHOME"
 	
@@ -63,7 +65,7 @@ RUN set -x && \
 		--enable-epoll \
 		--enable-external-acl-helpers="file_userip,unix_group,wbinfo_group" \
 		--enable-auth-ntlm="fake" \
-		--enable-auth-negotiate="wrapper" \
+		--enable-auth-negotiate="kerberos,wrapper" \
 		--enable-silent-rules \
 		--disable-mit \
 		--enable-heimdal \
@@ -93,15 +95,18 @@ RUN set -x && \
 		--with-openssl \
 		--with-pidfile=/var/run/squid/squid.pid
 
+
 RUN set -x && \
 	cd /tmp/build && \
-	make -j $(grep -cs ^processor /proc/cpuinfo) && \
-	make install
+	nproc=$(n=$(nproc) ; max_n=6 ; [ $n -le $max_n ] && echo $n || echo $max_n) && \
+	make -j $nproc && \
+	make install && \
+	cd tools/squidclient && make && make install-strip
 
 RUN sed -i '1s;^;include /etc/squid/conf.d/*.conf\n;' /etc/squid/squid.conf
 RUN echo 'include /etc/squid/conf.d.tail/*.conf' >> /etc/squid/squid.conf
 
-FROM alpine:3.11.3
+FROM alpine:3.14.0
 	
 ENV SQUID_CONFIG_FILE /etc/squid/squid.conf
 ENV TZ Europe/Moscow
@@ -110,18 +115,25 @@ RUN set -x && \
 	deluser squid 2>/dev/null; delgroup squid 2>/dev/null; \
 	addgroup -S squid -g 3128 && adduser -S -u 3128 -G squid -g squid -H -D -s /bin/false -h /var/cache/squid squid
 
+# fix conflict with libretls and libressl
+RUN set -x && \
+	apk add --no-cache libretls && \
+	apk upgrade --no-cache libretls
+
 RUN apk add --no-cache \
 		libstdc++ \
 		heimdal-libs \
 		libcap \
-		libressl3.0-libcrypto \
-		libressl3.0-libssl \
+		libressl3.3-libcrypto \
+		libressl3.3-libssl \
 		libltdl	
 
 COPY --from=build /etc/squid/ /etc/squid/
 COPY --from=build /usr/lib/squid/ /usr/lib/squid/
 COPY --from=build /usr/share/squid/ /usr/share/squid/
 COPY --from=build /usr/sbin/squid /usr/sbin/squid
+COPY --from=build /usr/bin/squidclient /usr/bin/squidclient
+
 		
 RUN install -d -o squid -g squid \
 		/var/cache/squid \
