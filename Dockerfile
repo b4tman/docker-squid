@@ -1,6 +1,6 @@
 FROM alpine:3.14.0 as build
 
-ENV SQUID_VER 4.16
+ENV SQUID_VER 5.1
 
 # fix conflict with libretls and libressl
 RUN set -x && \
@@ -95,6 +95,10 @@ RUN set -x && \
 		--with-openssl \
 		--with-pidfile=/var/run/squid/squid.pid
 
+# fix build
+RUN set -x && \
+    mkdir -p /tmp/build/tools/squidclient/tests && \
+    mkdir -p /tmp/build/tools/tests
 
 RUN set -x && \
 	cd /tmp/build && \
