@@ -95,6 +95,10 @@ RUN set -x && \
 		--with-openssl \
 		--with-pidfile=/var/run/squid/squid.pid
 
+# fix build
+RUN set -x && \
+    mkdir -p /tmp/build/tools/squidclient/tests && \
+    mkdir -p /tmp/build/tools/tests
 
 RUN set -x && \
 	cd /tmp/build && \
