@@ -118,8 +118,8 @@ RUN apk add --no-cache \
 		libstdc++ \
 		heimdal-libs \
 		libcap \
-		libressl3.3-libcrypto \
-		libressl3.3-libssl \
+		libressl3.4-libcrypto \
+		libressl3.4-libssl \
 		libltdl	
 
 COPY --from=build /etc/squid/ /etc/squid/
