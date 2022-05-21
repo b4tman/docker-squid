@@ -1,3 +1,5 @@
+#!/bin/sh
+
 FROM alpine:3.15.4 as build
 
 ENV SQUID_VER 5.5
