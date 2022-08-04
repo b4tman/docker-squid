@@ -1,17 +1,17 @@
 ---
 kind: pipeline
 type: docker
-name: arm32 images
+name: arm64 images
 platform:
   os: linux
-  arch: arm
+  arch: arm64
 steps:
 - name: squid image for dockerhub
   image: plugins/docker
   settings:
     repo: docker.io/b4tman/squid
     auto_tag: true
-    auto_tag_suffix: armhf
+    auto_tag_suffix: arm64
     pull_image: true
     registry: docker.io
     username: b4tman
@@ -19,10 +19,10 @@ steps:
       from_secret: docker_password
     config:
       from_secret: docker_config
-- name: squid-armhf image for github packages
+- name: squid-arm64 image for github packages
   image: plugins/docker
   settings:
-    repo: ghcr.io/b4tman/squid-armhf
+    repo: ghcr.io/b4tman/squid-arm64
     auto_tag: true
     pull_image: true
     registry: ghcr.io
