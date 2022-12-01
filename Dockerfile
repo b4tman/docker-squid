@@ -2,6 +2,12 @@ FROM alpine:3.17.0 as build
 
 ENV SQUID_VER 5.7
 
+# fix conflict with openssl-dev and libressl-dev
+RUN set -x && \
+        apk del openssl-dev; \
+	apk add --no-cache libressl-dev && \
+	apk upgrade --no-cache libressl-dev 
+
 RUN set -x && \
 	apk add --no-cache  \
 		gcc \
