@@ -9,7 +9,8 @@ RUN set -x && \
 		libc-dev \
 		curl \
 		gnupg \
-		libressl-dev \
+		openssl-dev \
+		openssl-libs-static \
 		perl-dev \
 		autoconf \
 		automake \
@@ -115,8 +116,6 @@ RUN apk add --no-cache \
 		libstdc++ \
 		heimdal-libs \
 		libcap \
-		libressl3.5-libcrypto \
-		libressl3.5-libssl \
 		libltdl	
 
 COPY --from=build /etc/squid/ /etc/squid/
