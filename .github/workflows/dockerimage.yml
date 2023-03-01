@@ -50,10 +50,10 @@ jobs:
         with:
           context: .
           push: false
+          load: true # automatically load the single-platform build result to docker images
           tags: ${{ env.TEST_TAG }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
-          outputs: type=image,name=${{ env.TEST_TAG }},push=false
 
       # Temp fix
       # https://github.com/docker/build-push-action/issues/252
