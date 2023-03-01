@@ -15,6 +15,9 @@ on:
     branches:
       - "master"
 
+env:
+  TEST_TAG: b4tman/squid:test
+
 jobs:
   test:
     runs-on: ubuntu-20.04
@@ -47,10 +50,10 @@ jobs:
         with:
           context: .
           push: false
-          tags: b4tman/squid
+          load: true # automatically load the single-platform build result to docker images
+          tags: ${{ env.TEST_TAG }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
-          outputs: type=image,name=b4tman/squid,push=false
 
       # Temp fix
       # https://github.com/docker/build-push-action/issues/252
@@ -61,25 +64,12 @@ jobs:
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
       - name: Test image
-        run: docker-compose -f docker-compose.test.yml up sut
+        run: docker compose -f docker-compose.test.yml up --pull never sut
 
-      - name: Build 'ssl-bump' image
-        uses: docker/build-push-action@v4
-        with:
-          context: ssl-bump
-          push: false
-          file: ssl-bump/Dockerfile
-          tags: b4tman/squid:ssl-bump
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
-
-      # Temp fix
-      # https://github.com/docker/build-push-action/issues/252
-      # https://github.com/moby/buildkit/issues/1896
-      - name: Move cache
+      - name: Build 'ssl-bump' image     
         run: |
-          rm -rf /tmp/.buildx-cache
-          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+          sed -i "s%FROM b4tman/squid%FROM $TEST_TAG%" ssl-bump/Dockerfile
+          docker build ssl-bump
 
   push:
     needs: test

@@ -1,6 +1,6 @@
 FROM alpine:3.17.2 as build
 
-ENV SQUID_VER 5.7
+ARG SQUID_VER=5.7
 
 RUN set -x && \
 	apk add --no-cache  \
@@ -21,32 +21,33 @@ RUN set -x && \
 		libcap-dev \
 		linux-headers
 
+WORKDIR /tmp/build
+
 RUN set -x && \
-	mkdir -p /tmp/build && \
-	cd /tmp/build && \
-    curl -SsL http://www.squid-cache.org/Versions/v${SQUID_VER%%.*}/squid-${SQUID_VER}.tar.gz -o squid-${SQUID_VER}.tar.gz && \
+	curl -SsL http://www.squid-cache.org/Versions/v${SQUID_VER%%.*}/squid-${SQUID_VER}.tar.gz -o squid-${SQUID_VER}.tar.gz && \
 	curl -SsL http://www.squid-cache.org/Versions/v${SQUID_VER%%.*}/squid-${SQUID_VER}.tar.gz.asc -o squid-${SQUID_VER}.tar.gz.asc
 
-COPY squid-keys.asc /tmp
+COPY squid-keys.asc /tmp/build
 
 RUN set -x && \
-	cd /tmp/build && \
-	export GNUPGHOME="$(mktemp -d)" && \
-	gpg --import /tmp/squid-keys.asc && \
+	GNUPGHOME="$(mktemp -d)" && \
+	export GNUPGHOME && \
+	gpg --import squid-keys.asc && \
 	gpg --batch --verify squid-${SQUID_VER}.tar.gz.asc squid-${SQUID_VER}.tar.gz && \
 	rm -rf "$GNUPGHOME"
-	
+
 RUN set -x && \
-	cd /tmp/build && \	
 	tar --strip 1 -xzf squid-${SQUID_VER}.tar.gz && \
+	\
+	MACHINE=$(uname -m) && \
 	\
 	CFLAGS="-g0 -O2" \
 	CXXFLAGS="-g0 -O2" \
 	LDFLAGS="-s" \
 	\
 	./configure \
-		--build="$(uname -m)" \
-		--host="$(uname -m)" \
+		--build="$MACHINE" \
+		--host="$MACHINE" \
 		--prefix=/usr \
 		--datadir=/usr/share/squid \
 		--sysconfdir=/etc/squid \
@@ -92,16 +93,18 @@ RUN set -x && \
 		--with-openssl \
 		--with-pidfile=/var/run/squid/squid.pid
 
-
 RUN set -x && \
-	cd /tmp/build && \
-	nproc=$(n=$(nproc) ; max_n=6 ; [ $n -le $max_n ] && echo $n || echo $max_n) && \
+	nproc=$(n=$(nproc) ; max_n=6 ; echo $(( n <= max_n ? n : max_n )) ) && \
 	make -j $nproc && \
-	make install && \
-	cd tools/squidclient && make && make install-strip
+	make install
 
-RUN sed -i '1s;^;include /etc/squid/conf.d/*.conf\n;' /etc/squid/squid.conf
-RUN echo 'include /etc/squid/conf.d.tail/*.conf' >> /etc/squid/squid.conf
+WORKDIR /tmp/build/tools/squidclient
+RUN make && make install-strip
+
+RUN sed -i '1s;^;include /etc/squid/conf.d/*.conf\n;' /etc/squid/squid.conf && \
+	echo 'include /etc/squid/conf.d.tail/*.conf' >> /etc/squid/squid.conf
+
+# --- --- --- --- --- --- --- --- ---
 
 FROM alpine:3.17.2
 	
@@ -116,7 +119,7 @@ RUN apk add --no-cache \
 		libstdc++ \
 		heimdal-libs \
 		libcap \
-		libltdl	
+		libltdl
 
 COPY --from=build /etc/squid/ /etc/squid/
 COPY --from=build /usr/lib/squid/ /usr/lib/squid/
@@ -124,25 +127,23 @@ COPY --from=build /usr/share/squid/ /usr/share/squid/
 COPY --from=build /usr/sbin/squid /usr/sbin/squid
 COPY --from=build /usr/bin/squidclient /usr/bin/squidclient
 
-		
 RUN install -d -o squid -g squid \
 		/var/cache/squid \
 		/var/log/squid \
 		/var/run/squid && \
-	chmod +x /usr/lib/squid/*
-	
-RUN install -d -m 755 -o squid -g squid \
+	chmod +x /usr/lib/squid/* && \
+	install -d -m 755 -o squid -g squid \
 		/etc/squid/conf.d \
-		/etc/squid/conf.d.tail
-RUN touch /etc/squid/conf.d/placeholder.conf 
+		/etc/squid/conf.d.tail && \
+	touch /etc/squid/conf.d/placeholder.conf
 COPY squid-log.conf /etc/squid/conf.d.tail/
 
 RUN	set -x && \
-	apk add --no-cache --virtual .tz alpine-conf tzdata && \ 
+	apk add --no-cache --virtual .tz alpine-conf tzdata && \
 	/sbin/setup-timezone -z $TZ && \
-	apk del .tz 	
-	
-VOLUME ["/var/cache/squid"]	
+	apk del .tz
+
+VOLUME ["/var/cache/squid"]
 EXPOSE 3128/tcp
 
 USER squid
