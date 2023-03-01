@@ -1,10 +1,7 @@
 version: '2.3'
 services:
   proxy:
-    image: squidproxy
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: "${TEST_TAG}"
     healthcheck:
       test: ["CMD", "sh", "-exc", "squidclient -T 3 mgr:info 2> /dev/null | grep -qF '200 OK'"]
       interval: 5s
@@ -12,9 +9,10 @@ services:
       retries: 5
       start_period: 1s
   sut:
-    image: squidproxy
+    image: "${TEST_TAG}"
     links: 
       - proxy
     depends_on:
       - proxy
     command: sh -exc "sleep 10 && squidclient -h proxy -T 3 'https://postman-echo.com/get?squidtest=ok' 2> /dev/null | grep -qF '200 OK'"
+

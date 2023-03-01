@@ -15,6 +15,9 @@ on:
     branches:
       - "master"
 
+env:
+  TEST_TAG: b4tman/squid:test
+
 jobs:
   test:
     runs-on: ubuntu-20.04
@@ -47,10 +50,10 @@ jobs:
         with:
           context: .
           push: false
-          tags: b4tman/squid
+          tags: ${{ env.TEST_TAG }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
-          outputs: type=image,name=b4tman/squid,push=false
+          outputs: type=image,name=${{ env.TEST_TAG }},push=false
 
       # Temp fix
       # https://github.com/docker/build-push-action/issues/252
@@ -61,7 +64,10 @@ jobs:
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
       - name: Test image
-        run: docker-compose -f docker-compose.test.yml up sut
+        run: docker compose -f docker-compose.test.yml up sut
+
+      - name: set base image for ssl-bump
+        run: sed -i "s%FROM b4tman/squid%FROM $TEST_TAG%" ssl-bump/Dockerfile
 
       - name: Build 'ssl-bump' image
         uses: docker/build-push-action@v4
