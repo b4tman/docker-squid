@@ -64,7 +64,7 @@ jobs:
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
       - name: Test image
-        run: docker compose -f docker-compose.test.yml up sut
+        run: docker compose -f docker-compose.test.yml up --pull never sut
 
       - name: set base image for ssl-bump
         run: sed -i "s%FROM b4tman/squid%FROM $TEST_TAG%" ssl-bump/Dockerfile
