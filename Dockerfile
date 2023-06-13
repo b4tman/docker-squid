@@ -1,4 +1,4 @@
-FROM alpine:3.17.3 as build
+FROM alpine:3.18.0 as build
 
 ARG SQUID_VER=6.0.2
 
@@ -58,7 +58,7 @@ RUN set -x && \
 		--disable-arch-native \
 		--enable-removal-policies="lru,heap" \
 		--enable-auth-digest \
-		--enable-auth-basic="getpwnam,NCSA,DB" \
+		--enable-auth-basic="getpwnam,NCSA,DB,RADIUS" \
 		--enable-basic-auth-helpers="DB" \
 		--enable-epoll \
 		--enable-external-acl-helpers="file_userip,unix_group,wbinfo_group" \
@@ -106,7 +106,7 @@ RUN sed -i '1s;^;include /etc/squid/conf.d/*.conf\n;' /etc/squid/squid.conf && \
 
 # --- --- --- --- --- --- --- --- ---
 
-FROM alpine:3.17.3
+FROM alpine:3.18.0
 	
 ENV SQUID_CONFIG_FILE /etc/squid/squid.conf
 ENV TZ Europe/Moscow
