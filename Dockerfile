@@ -58,7 +58,7 @@ RUN set -x && \
 		--disable-arch-native \
 		--enable-removal-policies="lru,heap" \
 		--enable-auth-digest \
-		--enable-auth-basic="getpwnam,NCSA,DB" \
+		--enable-auth-basic="getpwnam,NCSA,DB,RADIUS" \
 		--enable-basic-auth-helpers="DB" \
 		--enable-epoll \
 		--enable-external-acl-helpers="file_userip,unix_group,wbinfo_group" \
