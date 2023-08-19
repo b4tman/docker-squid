@@ -1,6 +1,6 @@
 FROM alpine:3.18.2 as build
 
-ARG SQUID_VER=6.1
+ARG SQUID_VER=6.2
 
 RUN set -x && \
 	apk add --no-cache  \
