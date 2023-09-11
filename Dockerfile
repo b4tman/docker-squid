@@ -86,7 +86,7 @@ RUN set -x && \
 		--enable-storeio="diskd rock" \
 		--enable-ipv6 \
 		--enable-translation \
-		--disable-snmp \
+		--enable-snmp \
 		--disable-dependency-tracking \
 		--with-large-files \
 		--with-default-user=squid \
