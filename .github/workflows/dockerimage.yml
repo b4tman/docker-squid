@@ -81,7 +81,7 @@ jobs:
 
       - name: Docker meta
         id: meta
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v5
         with:
           images: |
             b4tman/squid
@@ -95,7 +95,7 @@ jobs:
 
       - name: Docker meta (ssl-bump)
         id: meta_ssl_bump
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v5
         with:
           images: |
             b4tman/squid
@@ -110,7 +110,7 @@ jobs:
 
       - name: Docker meta (ssl-bump ghcr)
         id: meta_ssl_bump_ghcr
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v5
         with:
           images: |
             ghcr.io/b4tman/squid-ssl-bump
