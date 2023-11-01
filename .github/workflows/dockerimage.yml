@@ -47,7 +47,7 @@ jobs:
             ${{ runner.os }}-buildx-
 
       - name: Build squid image
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           push: false
@@ -149,7 +149,7 @@ jobs:
           password: ${{ secrets.CR_PAT }}
 
       - name: Build squid image
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           push: true
@@ -168,7 +168,7 @@ jobs:
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
       - name: Build 'ssl-bump' image
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: ssl-bump
           push: true
@@ -188,7 +188,7 @@ jobs:
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
       - name: Build 'ssl-bump' image for ghcr
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: ssl-bump
           push: true
