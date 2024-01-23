@@ -2,6 +2,8 @@ version: '2.3'
 services:
   proxy:
     image: "${TEST_TAG}"
+    volumes:
+      - './test_localnet.conf:/etc/squid/conf.d/test_localnet.conf:ro'
     healthcheck:
       test: ["CMD", "sh", "-exc", "squidclient -T 3 mgr:info 2> /dev/null | grep -qF '200 OK'"]
       interval: 5s
