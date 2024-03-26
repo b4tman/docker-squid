@@ -119,7 +119,8 @@ RUN apk add --no-cache \
 		libstdc++ \
 		heimdal-libs \
 		libcap \
-		libltdl
+		libltdl \
+		tzdata
 
 COPY --from=build /etc/squid/ /etc/squid/
 COPY --from=build /usr/lib/squid/ /usr/lib/squid/
@@ -137,11 +138,6 @@ RUN install -d -o squid -g squid \
 		/etc/squid/conf.d.tail && \
 	touch /etc/squid/conf.d/placeholder.conf
 COPY squid-log.conf /etc/squid/conf.d.tail/
-
-RUN	set -x && \
-	apk add --no-cache --virtual .tz alpine-conf tzdata && \
-	/sbin/setup-timezone -z $TZ && \
-	apk del .tz
 
 VOLUME ["/var/cache/squid"]
 EXPOSE 3128/tcp
