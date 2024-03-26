@@ -128,6 +128,8 @@ COPY --from=build /usr/share/squid/ /usr/share/squid/
 COPY --from=build /usr/sbin/squid /usr/sbin/squid
 COPY --from=build /usr/bin/squidclient /usr/bin/squidclient
 
+COPY --chmod=755 run.sh /
+
 RUN install -d -o squid -g squid \
 		/var/cache/squid \
 		/var/log/squid \
@@ -144,4 +146,4 @@ EXPOSE 3128/tcp
 
 USER squid
 
-CMD ["sh", "-c", "rm -f /var/run/squid/squid.pid ; /usr/sbin/squid -f ${SQUID_CONFIG_FILE} --foreground -z && exec /usr/sbin/squid -f ${SQUID_CONFIG_FILE} --foreground -YCd 1"]
+CMD ["/run.sh"]
