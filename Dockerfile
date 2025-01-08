@@ -1,4 +1,4 @@
-FROM alpine:3.20.3 as build
+FROM alpine:3.21.0 as build
 
 ARG SQUID_VER=6.10
 
@@ -106,7 +106,7 @@ RUN sed -i '1s;^;include /etc/squid/conf.d/*.conf\n;' /etc/squid/squid.conf && \
 
 # --- --- --- --- --- --- --- --- ---
 
-FROM alpine:3.20.3
+FROM alpine:3.21.0
 	
 ENV SQUID_CONFIG_FILE /etc/squid/squid.conf
 ENV TZ Europe/Moscow
