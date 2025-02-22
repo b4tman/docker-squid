@@ -24,8 +24,8 @@ RUN set -x && \
 WORKDIR /tmp/build
 
 RUN set -x && \
-	curl -SsL http://www.squid-cache.org/Versions/v${SQUID_VER%%.*}/squid-${SQUID_VER}.tar.gz -o squid-${SQUID_VER}.tar.gz && \
-	curl -SsL http://www.squid-cache.org/Versions/v${SQUID_VER%%.*}/squid-${SQUID_VER}.tar.gz.asc -o squid-${SQUID_VER}.tar.gz.asc
+	curl -fSsL "https://github.com/squid-cache/squid/releases/download/SQUID_${SQUID_VER//./_}/squid-${SQUID_VER}.tar.gz" -o squid-${SQUID_VER}.tar.gz && \
+	curl -fSsL "https://github.com/squid-cache/squid/releases/download/SQUID_${SQUID_VER//./_}/squid-${SQUID_VER}.tar.gz.asc" -o squid-${SQUID_VER}.tar.gz.asc
 
 COPY squid-keys.asc /tmp/build
 
