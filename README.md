@@ -30,6 +30,9 @@ docker-compose up
 
 # Configuration
 
+By default, the image now includes a local network allow-list (`/etc/squid/conf.d/localnet.conf`) so clients from RFC1918/RFC4193 ranges can connect without mounting an extra ACL file.
+
+
 ## Environment variables:
 
 - **SQUID_CONFIG_FILE**: Specify the configuration file for squid. Defaults to `/etc/squid/squid.conf`.

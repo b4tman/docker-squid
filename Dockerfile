@@ -139,6 +139,7 @@ RUN install -d -o squid -g squid \
 		/etc/squid/conf.d \
 		/etc/squid/conf.d.tail && \
 	touch /etc/squid/conf.d/placeholder.conf
+COPY localnet.conf /etc/squid/conf.d/
 COPY squid-log.conf /etc/squid/conf.d.tail/
 
 VOLUME ["/var/cache/squid"]
