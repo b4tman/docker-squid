@@ -32,6 +32,8 @@ docker-compose up
 
 By default, the image now includes a local network allow-list (`/etc/squid/conf.d/localnet.conf`) so clients from RFC1918/RFC4193 ranges can connect without mounting an extra ACL file.
 
+The image also includes `apache2-utils`, so you can generate and manage `htpasswd` files directly in the container for basic authentication setups.
+
 
 ## Environment variables:
 

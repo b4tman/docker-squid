@@ -120,6 +120,7 @@ RUN apk add --no-cache \
 		heimdal-libs \
 		libcap \
 		libltdl \
+		apache2-utils \
 		tzdata
 
 COPY --from=build /etc/squid/ /etc/squid/
