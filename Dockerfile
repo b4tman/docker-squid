@@ -1,6 +1,6 @@
 FROM alpine:3.23.3 as build
 
-ARG SQUID_VER=6.13
+ARG SQUID_VER=7.4
 
 RUN set -x && \
 	apk add --no-cache  \
@@ -98,9 +98,6 @@ RUN set -x && \
 	make -j $nproc && \
 	make install
 
-WORKDIR /tmp/build/tools/squidclient
-RUN make && make install-strip
-
 RUN sed -i '1s;^;include /etc/squid/conf.d/*.conf\n;' /etc/squid/squid.conf && \
 	echo 'include /etc/squid/conf.d.tail/*.conf' >> /etc/squid/squid.conf
 
@@ -121,13 +118,13 @@ RUN apk add --no-cache \
 		libcap \
 		libltdl \
 		apache2-utils \
+		curl \
 		tzdata
 
 COPY --from=build /etc/squid/ /etc/squid/
 COPY --from=build /usr/lib/squid/ /usr/lib/squid/
 COPY --from=build /usr/share/squid/ /usr/share/squid/
 COPY --from=build /usr/sbin/squid /usr/sbin/squid
-COPY --from=build /usr/bin/squidclient /usr/bin/squidclient
 
 COPY --chmod=755 run.sh /
 
