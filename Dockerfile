@@ -1,4 +1,4 @@
-FROM alpine:3.23.3 as build
+FROM alpine:3.23.3 AS build
 
 ARG SQUID_VER=7.4
 
@@ -105,8 +105,8 @@ RUN sed -i '1s;^;include /etc/squid/conf.d/*.conf\n;' /etc/squid/squid.conf && \
 
 FROM alpine:3.23.3
 	
-ENV SQUID_CONFIG_FILE /etc/squid/squid.conf
-ENV TZ Europe/Moscow
+ENV SQUID_CONFIG_FILE=/etc/squid/squid.conf
+ENV TZ=Europe/Moscow
 
 RUN set -x && \
 	deluser squid 2>/dev/null; delgroup squid 2>/dev/null; \
