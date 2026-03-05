@@ -38,6 +38,13 @@ The image also includes `apache2-utils`, so you can generate and manage `htpassw
 ## Environment variables:
 
 - **SQUID_CONFIG_FILE**: Specify the configuration file for squid. Defaults to `/etc/squid/squid.conf`.
+- **TZ**: Override the container timezone (for example, `Europe/Berlin`).
+
+You can configure Squid in multiple ways:
+
+- Replace the main configuration file by overriding `SQUID_CONFIG_FILE`.
+- Add configuration snippets to `/etc/squid/conf.d`: all `*.conf` files from this directory are included at the **beginning** of the default configuration.
+- Add configuration snippets to `/etc/squid/conf.d.tail`: all `*.conf` files from this directory are included at the **end** of the default configuration.
 
 ## Example:
 
