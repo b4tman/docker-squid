@@ -24,8 +24,8 @@ RUN set -x && \
 WORKDIR /tmp/build
 
 RUN set -x && \
-	curl -fSsL "https://github.com/squid-cache/squid/releases/download/SQUID_${SQUID_VER//./_}/squid-${SQUID_VER}.tar.gz" -o squid-${SQUID_VER}.tar.gz && \
-	curl -fSsL "https://github.com/squid-cache/squid/releases/download/SQUID_${SQUID_VER//./_}/squid-${SQUID_VER}.tar.gz.asc" -o squid-${SQUID_VER}.tar.gz.asc
+	curl -fSsL "https://github.com/squid-cache/squid/releases/download/SQUID_${SQUID_VER//./_}/squid-${SQUID_VER}.tar.xz" -o squid-${SQUID_VER}.tar.xz && \
+	curl -fSsL "https://github.com/squid-cache/squid/releases/download/SQUID_${SQUID_VER//./_}/squid-${SQUID_VER}.tar.xz.asc" -o squid-${SQUID_VER}.tar.xz.asc
 
 COPY squid-keys.asc /tmp/build
 
@@ -33,11 +33,11 @@ RUN set -x && \
 	GNUPGHOME="$(mktemp -d)" && \
 	export GNUPGHOME && \
 	gpg --import squid-keys.asc && \
-	gpg --batch --verify squid-${SQUID_VER}.tar.gz.asc squid-${SQUID_VER}.tar.gz && \
+	gpg --batch --verify squid-${SQUID_VER}.tar.xz.asc squid-${SQUID_VER}.tar.xz && \
 	rm -rf "$GNUPGHOME"
 
 RUN set -x && \
-	tar --strip 1 -xzf squid-${SQUID_VER}.tar.gz && \
+	tar --strip 1 -xf squid-${SQUID_VER}.tar.xz && \
 	\
 	MACHINE=$(uname -m) && \
 	\
