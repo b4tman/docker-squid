@@ -1,3 +1,5 @@
+
+
 ![Docker Image CI Status](https://github.com/b4tman/docker-squid/workflows/Docker%20Image%20CI/badge.svg)
 
 # docker-squid
@@ -25,7 +27,7 @@ or use [docker-compose](https://docs.docker.com/compose/):
 
 ```bash
 wget https://raw.githubusercontent.com/b4tman/docker-squid/master/docker-compose.yml
-docker-compose up
+docker compose up -d
 ```
 
 # Configuration
